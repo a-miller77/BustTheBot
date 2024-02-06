@@ -5,6 +5,9 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 import time
 
+FILE_MODE = True
+file_path = "./input.txt"
+
 # Initialize the WebDriver (replace 'Chrome' with your browser of choice)
 driver = webdriver.Chrome()
 
@@ -23,8 +26,15 @@ def chat_with_bot(question, child_num):
              f"#GeckoChatWidget > div.GeckoChatWidget > div > div.Conversation > div:nth-child({child_num}) > div.Message-content"
              ))
              )
-    response_text = reply_box.text
-    return response_text
+    response_text_1 = "123"
+    response_text_2 = "456"
+    while (not response_text_1 == response_text_2):
+        time.sleep(1)
+        response_text_1 = reply_box.text
+        time.sleep(1)
+        response_text_2 = reply_box.text
+    return response_text_2
+
 try:
     # Open the website with the chatbot
     driver.get("https://widget-assets.geckochat.io/widget.html?widget=s6uMmAyXZPK0ytv")
@@ -37,7 +47,14 @@ try:
     time.sleep(2)
 
     # Interact with the chatbot
-    questions = ["What is your name?", "What is your name?", "What is your name?", "What is your name?"]
+    if FILE_MODE and not file_path == None:
+        # Open the file in read mode
+        with open(file_path, 'r') as file:
+            # Read lines from the file and remove newline characters
+            questions = [line.strip() for line in file.readlines()]
+    else:
+        questions = ["What is your name?", "What is your name?", "What is your name?", "What is your name?"]
+
     for num, question in enumerate(questions, start=1):
         response = chat_with_bot(question, num*2)
         print(f"Question: {question}\nResponse: {response}\n")
