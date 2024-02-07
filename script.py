@@ -12,6 +12,7 @@ FILE_MODE = True
 SAVE_TRANSCRIPT = False
 file_input_path = "./input.txt"
 file_output_path = f"./outputs/output-{datetime.now().strftime('%m-%d_%H%M%S')}.txt"
+key_questions_answers_output_path = "./outputs/key_questions_answers.txt"
 key_questions_output_path = "./outputs/key_questions.txt"
 
 
@@ -63,12 +64,14 @@ try:
         questions = ["What is your name?", "What is your name?", "What is your name?", "What is your name?"]
 
     responses = []
+    key_questions_responses = []
     key_questions = []
     for num, question in enumerate(questions, start=1):
         response = chat_with_bot(question, num*2)
         if FILE_MODE:
-            if "sorry" in response.lower(): 
-                key_questions.append(f"Question: {question}\nResponse: {response}\n")
+            if "sorry" in response.lower():
+                key_questions.append(question)
+                key_questions_responses.append(f"Question: {question}\nResponse: {response}\n")
             responses.append(f"Question: {question}\nResponse: {response}\n")
         else:
             print(f"Question: {question}\nResponse: {response}\n")
@@ -89,4 +92,8 @@ finally:
         with open(key_questions_output_path, 'a') as file:
             # Write each line to the file
             for line in key_questions:
+                file.write(unidecode(line) + '\n')
+        with open(key_questions_answers_output_path, 'a') as file:
+            # Write each line to the file
+            for line in key_questions_responses:
                 file.write(unidecode(line) + '\n')
