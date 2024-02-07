@@ -3,10 +3,17 @@ from selenium.webdriver import Keys
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
+from unidecode import unidecode
 import time
+from datetime import datetime
+
 
 FILE_MODE = True
-file_path = "./input.txt"
+SAVE_TRANSCRIPT = False
+file_input_path = "./input.txt"
+file_output_path = f"./outputs/output-{datetime.now().strftime('%m-%d_%H%M%S')}.txt"
+key_questions_output_path = "./outputs/key_questions.txt"
+
 
 # Initialize the WebDriver (replace 'Chrome' with your browser of choice)
 driver = webdriver.Chrome()
@@ -47,18 +54,39 @@ try:
     time.sleep(2)
 
     # Interact with the chatbot
-    if FILE_MODE and not file_path == None:
+    if FILE_MODE and not file_input_path == None:
         # Open the file in read mode
-        with open(file_path, 'r') as file:
+        with open(file_input_path, 'r') as file:
             # Read lines from the file and remove newline characters
             questions = [line.strip() for line in file.readlines()]
     else:
         questions = ["What is your name?", "What is your name?", "What is your name?", "What is your name?"]
 
+    responses = []
+    key_questions = []
     for num, question in enumerate(questions, start=1):
         response = chat_with_bot(question, num*2)
-        print(f"Question: {question}\nResponse: {response}\n")
-
+        if FILE_MODE:
+            if "sorry" in response.lower(): 
+                key_questions.append(f"Question: {question}\nResponse: {response}\n")
+            responses.append(f"Question: {question}\nResponse: {response}\n")
+        else:
+            print(f"Question: {question}\nResponse: {response}\n")
 finally:
+    if SAVE_TRANSCRIPT:
+        driver.find_element(
+            "xpath",
+            '//*[@id="GeckoChatWidget"]/div[1]/div/div[1]/div[2]').click()
     # Close the browser window
+    time.sleep(2)
     driver.quit()
+
+    if FILE_MODE and not file_output_path == None:
+        with open(file_output_path, 'w') as file:
+            # Write each line to the file
+            for line in responses:
+                file.write(unidecode(line) + '\n')
+        with open(key_questions_output_path, 'a') as file:
+            # Write each line to the file
+            for line in key_questions:
+                file.write(unidecode(line) + '\n')
